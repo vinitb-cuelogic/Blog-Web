@@ -9,21 +9,36 @@ export class HttpClientInterceptor implements HttpInterceptor {
 
   }
 
-  intercept(req: HttpRequest<any>,
-            next: HttpHandler): Observable<HttpEvent<any>> {
+  // intercept(req: HttpRequest<any>,
+  //           next: HttpHandler): Observable<HttpEvent<any>> {
 
-    const token = this.$localStorage.retrieve("authenticationToken");
-    console.log('jwt token ' + token);
-    if (token) {
-      const cloned = req.clone({
-        headers: req.headers.set("Authorization",
-          "Bearer " + token)
-      });
+  //   const token = this.$localStorage.retrieve("authenticationToken");
+  //   console.log('jwt token ' + token);
+  //   if (token) {
+  //     const cloned = req.clone({
+  //       headers: req.headers.set("Authorization",
+  //         "Bearer " + token)
+  //     });
 
-      return next.handle(cloned);
+  //     return next.handle(cloned);
+  //   }
+  //   else {
+  //     return next.handle(req);
+  //   }
+  // }
+  intercept(req: HttpRequest<any>, next: HttpHandler) {
+    let authReq = req;
+    let c=true;
+    const re = '/api/auth/login/';
+    if (req.url.search(re) === -1) {
+      const token = localStorage.getItem('authenticationToken');
+      if (token != null) {
+        authReq = req.clone({
+          headers: req.headers.set("Authorization", 'Bearer ' + token),
+        });
+      }
     }
-    else {
-      return next.handle(req);
-    }
+    
+    return next.handle(authReq);
   }
 }
